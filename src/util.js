@@ -1,12 +1,21 @@
 'use strict'
 
+// @ts-ignore
 require('node-forge/lib/util')
+// @ts-ignore
 require('node-forge/lib/jsbn')
+/** @type {import('node-forge')} */
+// @ts-ignore
 const forge = require('node-forge/lib/forge')
 const uint8ArrayFromString = require('uint8arrays/from-string')
 const uint8ArrayToString = require('uint8arrays/to-string')
 const uint8ArrayConcat = require('uint8arrays/concat')
 
+/**
+ *
+ * @param {import('node-forge').jsbn.BigInteger} num
+ * @param {number} [len]
+ */
 exports.bigIntegerToUintBase64url = (num, len) => {
   // Call `.abs()` to convert to unsigned
   let buf = Uint8Array.from(num.abs().toByteArray()) // toByteArray converts to big endian
@@ -25,12 +34,21 @@ exports.bigIntegerToUintBase64url = (num, len) => {
   return uint8ArrayToString(buf, 'base64url')
 }
 
-// Convert a base64url encoded string to a BigInteger
+/**
+ * Convert a base64url encoded string to a BigInteger
+ *
+ * @param {string} str
+ */
 exports.base64urlToBigInteger = str => {
   const buf = exports.base64urlToBuffer(str)
   return new forge.jsbn.BigInteger(uint8ArrayToString(buf, 'base16'), 16)
 }
 
+/**
+ *
+ * @param {string} str
+ * @param {number} [len]
+ */
 exports.base64urlToBuffer = (str, len) => {
   let buf = uint8ArrayFromString(str, 'base64urlpad')
 

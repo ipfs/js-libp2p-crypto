@@ -18,11 +18,11 @@ const bytes = {
   32: 'AES-256'
 }
 
-/** @typedef {import("libp2p-crypto").aes.Cipher} Cipher */
+/** @typedef {import("libp2p-interfaces/src/crypto/types").Cipher} Cipher */
 
 describe('AES-CTR', () => {
-  Object.keys(bytes).forEach((byte) => {
-    it(`${bytes[byte]} - encrypt and decrypt`, async () => {
+  Object.entries(bytes).forEach(([byte, name]) => {
+    it(`${name} - encrypt and decrypt`, async () => {
       const key = new Uint8Array(parseInt(byte, 10))
       key.fill(5)
 
@@ -39,9 +39,10 @@ describe('AES-CTR', () => {
     })
   })
 
-  Object.keys(bytes).forEach((byte) => {
-    it(`${bytes[byte]} - fixed - encrypt and decrypt`, async () => {
-      const key = new Uint8Array(parseInt(byte, 10))
+  Object.entries(bytes).forEach(([key, name]) => {
+    const byte = /** @type {16|32} */(parseInt(key, 10))
+    it(`${name} - fixed - encrypt and decrypt`, async () => {
+      const key = new Uint8Array(byte)
       key.fill(5)
 
       const iv = new Uint8Array(16)
@@ -62,13 +63,14 @@ describe('AES-CTR', () => {
     })
   })
 
-  Object.keys(bytes).forEach((byte) => {
+  Object.keys(bytes).forEach((key) => {
+    const byte = /** @type {16} */(parseInt(key, 10))
     if (!goFixtures[byte]) {
       return
     }
 
     it(`${bytes[byte]} - go interop - encrypt and decrypt`, async () => {
-      const key = new Uint8Array(parseInt(byte, 10))
+      const key = new Uint8Array(byte)
       key.fill(5)
 
       const iv = new Uint8Array(16)

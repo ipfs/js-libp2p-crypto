@@ -4,6 +4,11 @@
 
 // Check native crypto exists and is enabled (In insecure context `self.crypto`
 // exists but `self.crypto.subtle` does not).
+/**
+ * 
+ * @param {Window & {msCrypto?: Crypto}} [win]
+ * @returns {Crypto}
+ */
 exports.get = (win = self) => {
   const nativeCrypto = win.crypto || win.msCrypto
 

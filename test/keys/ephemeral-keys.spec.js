@@ -10,6 +10,7 @@ chai.use(dirtyChai)
 const fixtures = require('../fixtures/go-elliptic-key')
 const crypto = require('../../src')
 
+/** @type {import('libp2p-crypto').CurveType[]} */
 const curves = ['P-256', 'P-384'] // 'P-521' fails in tests :( no clue why
 // @ts-check
 /**
@@ -67,6 +68,7 @@ describe('generateEphemeralKeyPair', () => {
 
   it('handles bad curve name', async () => {
     try {
+      // @ts-expect-error - invalid name
       await crypto.keys.generateEphemeralKeyPair('bad name')
     } catch (err) {
       expect(err.code).equals('ERR_INVALID_CURVE')

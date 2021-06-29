@@ -2,6 +2,11 @@
 
 const errcode = require('err-code')
 
+/**
+ *
+ * @param {string[]} curveTypes
+ * @param {string} type
+ */
 module.exports = function (curveTypes, type) {
   if (!curveTypes.includes(type)) {
     const names = curveTypes.join(' / ')

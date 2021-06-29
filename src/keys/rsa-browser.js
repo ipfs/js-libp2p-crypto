@@ -7,6 +7,9 @@ const uint8ArrayFromString = require('uint8arrays/from-string')
 
 exports.utils = require('./rsa-utils')
 
+/**
+ * @param {number} bits
+ */
 exports.generateKey = async function (bits) {
   const pair = await webcrypto.get().subtle.generateKey(
     {
@@ -27,7 +30,9 @@ exports.generateKey = async function (bits) {
   }
 }
 
-// Takes a jwk key
+/**
+ * @param {JsonWebKey} key
+ */
 exports.unmarshalPrivateKey = async function (key) {
   const privateKey = await webcrypto.get().subtle.importKey(
     'jwk',
@@ -58,6 +63,10 @@ exports.unmarshalPrivateKey = async function (key) {
 
 exports.getRandomValues = randomBytes
 
+/**
+ * @param {JsonWebKey} key
+ * @param {Uint8Array} msg
+ */
 exports.hashAndSign = async function (key, msg) {
   const privateKey = await webcrypto.get().subtle.importKey(
     'jwk',
@@ -76,9 +85,16 @@ exports.hashAndSign = async function (key, msg) {
     Uint8Array.from(msg)
   )
 
-  return new Uint8Array(sig, sig.byteOffset, sig.byteLength)
+  return new Uint8Array(sig)
 }
 
+/**
+ *
+ * @param {JsonWebKey} key
+ * @param {Uint8Array} sig
+ * @param {Uint8Array} msg
+ * @returns
+ */
 exports.hashAndVerify = async function (key, sig, msg) {
   const publicKey = await webcrypto.get().subtle.importKey(
     'jwk',
@@ -99,6 +115,10 @@ exports.hashAndVerify = async function (key, sig, msg) {
   )
 }
 
+/**
+ *
+ * @param {{privateKey: CryptoKey, publicKey: CryptoKey}} pair
+ */
 function exportKey (pair) {
   return Promise.all([
     webcrypto.get().subtle.exportKey('jwk', pair.privateKey),
@@ -106,6 +126,9 @@ function exportKey (pair) {
   ])
 }
 
+/**
+ * @param {JsonWebKey} jwKey
+ */
 function derivePublicFromPrivate (jwKey) {
   return webcrypto.get().subtle.importKey(
     'jwk',
@@ -137,17 +160,26 @@ Explanation:
 
 const { jwk2pub, jwk2priv } = require('./jwk2pem')
 
-function convertKey (key, pub, msg, handle) {
-  const fkey = pub ? jwk2pub(key) : jwk2priv(key)
-  const fmsg = uint8ArrayToString(Uint8Array.from(msg), 'ascii')
-  const fomsg = handle(fmsg, fkey)
-  return uint8ArrayFromString(fomsg, 'ascii')
-}
+/**
+ * @param {Uint8Array} bytes
+ */
+const encodeAscii = bytes => uint8ArrayToString(Uint8Array.from(bytes), 'ascii')
 
-exports.encrypt = function (key, msg) {
-  return convertKey(key, true, msg, (msg, key) => key.encrypt(msg))
-}
+/**
+ * @param {string} text
+ */
+const decodeAscii = text => uint8ArrayFromString(text, 'ascii')
 
-exports.decrypt = function (key, msg) {
-  return convertKey(key, false, msg, (msg, key) => key.decrypt(msg))
-}
+/**
+ * @param {import('pem-jwk').RSA_JWK} key
+ * @param {Uint8Array} msg
+ */
+exports.encrypt = (key, msg) =>
+  decodeAscii(jwk2pub(key).encrypt(encodeAscii(msg)))
+
+/**
+ * @param {import('pem-jwk').RSA_JWK} key
+ * @param {Uint8Array} msg
+ */
+exports.decrypt = (key, msg) =>
+  decodeAscii(jwk2priv(key).decrypt(encodeAscii(msg)))

@@ -1,6 +1,8 @@
 'use strict'
 
+// @ts-ignore
 const forgePbkdf2 = require('node-forge/lib/pbkdf2')
+// @ts-ignore
 const forgeUtil = require('node-forge/lib/util')
 const errcode = require('err-code')
 
@@ -20,11 +22,11 @@ const hashName = {
 /**
  * Computes the Password-Based Key Derivation Function 2.
  *
- * @param {string} password
- * @param {string} salt
- * @param {number} iterations
- * @param {number} keySize - (in bytes)
- * @param {string} hash - The hash name ('sha1', 'sha2-512, ...)
+ * @param {string} password - The password.
+ * @param {string} salt - The salt.
+ * @param {number} iterations - Number of iterations to use.
+ * @param {number} keySize - The size of the output key in bytes.
+ * @param {keyof hashName} hash - The hash name ('sha1', 'sha2-512, ...)
  * @returns {string} - A new password
  */
 function pbkdf2 (password, salt, iterations, keySize, hash) {

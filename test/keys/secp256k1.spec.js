@@ -14,6 +14,7 @@ const uint8ArrayFromString = require('uint8arrays/from-string')
 const fixtures = require('../fixtures/go-key-secp256k1')
 
 describe('secp256k1 keys', () => {
+  /** @type {import('../../src/keys/secp256k1-class').PrivateKey} */
   let key
 
   before(async () => {
@@ -117,7 +118,9 @@ describe('secp256k1 keys', () => {
 })
 
 describe('key generation error', () => {
+  /** @type {typeof secp256k1Crypto.generateKey} */
   let generateKey
+  /** @type {typeof crypto.keys.supportedKeys.secp256k1} */
   let secp256k1
 
   before(() => {
@@ -141,7 +144,9 @@ describe('key generation error', () => {
 })
 
 describe('handles generation of invalid key', () => {
+  /** @type {typeof secp256k1Crypto.generateKey} */
   let generateKey
+  /** @type {typeof crypto.keys.supportedKeys.secp256k1} */
   let secp256k1
 
   before(() => {
@@ -165,7 +170,9 @@ describe('handles generation of invalid key', () => {
 })
 
 describe('crypto functions', () => {
+  /** @type {Uint8Array} */
   let privKey
+  /** @type {Uint8Array} */
   let pubKey
 
   before(async () => {
@@ -193,6 +200,7 @@ describe('crypto functions', () => {
 
   it('errors if given a null Uint8Array to sign', async () => {
     try {
+      // @ts-expect-error
       await secp256k1Crypto.hashAndSign(privKey, null)
     } catch (err) {
       return // expected
@@ -213,6 +221,7 @@ describe('crypto functions', () => {
     const sig = await secp256k1Crypto.hashAndSign(privKey, uint8ArrayFromString('hello'))
 
     try {
+      // @ts-expect-error
       await secp256k1Crypto.hashAndVerify(privKey, sig, null)
     } catch (err) {
       return // expected

@@ -1,5 +1,6 @@
 'use strict'
 
+// @ts-ignore
 const sha = require('multihashing-async/src/sha')
 const errcode = require('err-code')
 const uint8ArrayEquals = require('uint8arrays/equals')
@@ -8,11 +9,31 @@ const crypto = require('./ed25519')
 const pbm = require('./keys')
 const exporter = require('./exporter')
 
+/**
+ * @typedef {import('libp2p-interfaces/src/crypto/types').PublicKey<'Ed25519'>} PublicKey
+ * @implements {PublicKey}
+ */
 class Ed25519PublicKey {
+  /**
+   * @param {Uint8Array} key
+   */
   constructor (key) {
+    /** @private */
     this._key = ensureKey(key, crypto.publicKeyLength)
   }
 
+  /**
+   * @type {'Ed25519'}
+   */
+  get algorithm () {
+    return 'Ed25519'
+  }
+
+  /**
+   *
+   * @param {Uint8Array} data
+   * @param {Uint8Array} sig
+   */
   async verify (data, sig) { // eslint-disable-line require-await
     return crypto.hashAndVerify(this._key, sig, data)
   }
@@ -28,6 +49,10 @@ class Ed25519PublicKey {
     }).finish()
   }
 
+  /**
+   * @param {import('libp2p-interfaces/src/crypto/types').PublicKey} key
+   * @returns {key is this}
+   */
   equals (key) {
     return uint8ArrayEquals(this.bytes, key.bytes)
   }
@@ -37,14 +62,33 @@ class Ed25519PublicKey {
   }
 }
 
+/**
+ * @typedef {import('libp2p-interfaces/src/crypto/types').PrivateKey<'Ed25519'>} PrivateKey
+ * @implements {PrivateKey}
+ */
 class Ed25519PrivateKey {
-  // key       - 64 byte Uint8Array containing private key
-  // publicKey - 32 byte Uint8Array containing public key
+  /**
+   *
+   * @param {Uint8Array} key - 64 byte Uint8Array containing private key
+   * @param {Uint8Array} publicKey - 32 byte Uint8Array containing public key
+   */
   constructor (key, publicKey) {
+    /** @private */
     this._key = ensureKey(key, crypto.privateKeyLength)
+    /** @private */
     this._publicKey = ensureKey(publicKey, crypto.publicKeyLength)
   }
 
+  /**
+   * @type {'Ed25519'}
+   */
+  get algorithm () {
+    return 'Ed25519'
+  }
+
+  /**
+   * @param {Uint8Array} message
+   */
   async sign (message) { // eslint-disable-line require-await
     return crypto.hashAndSign(this._key, message)
   }
@@ -64,6 +108,10 @@ class Ed25519PrivateKey {
     }).finish()
   }
 
+  /**
+   * @param {import('libp2p-interfaces/src/crypto/types').PrivateKey} key
+   * @returns {key is this}
+   */
   equals (key) {
     return uint8ArrayEquals(this.bytes, key.bytes)
   }
@@ -91,7 +139,7 @@ class Ed25519PrivateKey {
    *
    * @param {string} password - The password to encrypt the key
    * @param {string} [format=libp2p-key] - The format in which to export as
-   * @returns {Promise<Uint8Array>} The encrypted private key
+   * @returns {Promise<string>} The encrypted private key
    */
   async export (password, format = 'libp2p-key') { // eslint-disable-line require-await
     if (format === 'libp2p-key') {
@@ -102,6 +150,10 @@ class Ed25519PrivateKey {
   }
 }
 
+/**
+ * @param {Uint8Array} bytes
+ * @returns {PrivateKey}
+ */
 function unmarshalEd25519PrivateKey (bytes) {
   // Try the old, redundant public key version
   if (bytes.length > crypto.privateKeyLength) {
@@ -117,21 +169,38 @@ function unmarshalEd25519PrivateKey (bytes) {
   return new Ed25519PrivateKey(privateKeyBytes, publicKeyBytes)
 }
 
+/**
+ * @param {Uint8Array} bytes
+ * @returns {PublicKey}
+ */
 function unmarshalEd25519PublicKey (bytes) {
   bytes = ensureKey(bytes, crypto.publicKeyLength)
   return new Ed25519PublicKey(bytes)
 }
 
+/**
+ * @returns {Promise<PrivateKey>}
+ */
 async function generateKeyPair () {
   const { privateKey, publicKey } = await crypto.generateKey()
   return new Ed25519PrivateKey(privateKey, publicKey)
 }
 
+/**
+ *
+ * @param {Uint8Array} seed
+ * @returns {Promise<PrivateKey>}
+ */
 async function generateKeyPairFromSeed (seed) {
   const { privateKey, publicKey } = await crypto.generateKeyFromSeed(seed)
   return new Ed25519PrivateKey(privateKey, publicKey)
 }
 
+/**
+ *
+ * @param {Uint8Array} key
+ * @param {number} length
+ */
 function ensureKey (key, length) {
   key = Uint8Array.from(key || [])
   if (key.length !== length) {

@@ -10,6 +10,7 @@ const uint8ArrayFromString = require('uint8arrays/from-string')
 
 const crypto = require('../../src')
 
+/** @type {import('../../src').HashType[]} */
 const hashes = ['SHA1', 'SHA256', 'SHA512']
 
 describe('HMAC', () => {

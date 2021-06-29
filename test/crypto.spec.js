@@ -11,7 +11,7 @@ const fixtures = require('./fixtures/go-key-rsa')
 const { expectErrCode } = require('./util')
 const uint8ArrayEquals = require('uint8arrays/equals')
 
-/** @typedef {import("libp2p-crypto").PrivateKey} PrivateKey */
+/** @typedef {import("libp2p-interfaces/src/crypto/types").PrivateKey<any>} PrivateKey */
 
 describe('libp2p-crypto', function () {
   this.timeout(20 * 1000)
@@ -47,11 +47,13 @@ describe('libp2p-crypto', function () {
   })
 
   it('generateKeyPair', () => {
+    // @ts-expect-error
     return expectErrCode(crypto.keys.generateKeyPair('invalid-key-type', 512), 'ERR_UNSUPPORTED_KEY_TYPE')
   })
 
   it('generateKeyPairFromSeed', () => {
     const seed = crypto.randomBytes(32)
+    // @ts-expect-error
     return expectErrCode(crypto.keys.generateKeyPairFromSeed('invalid-key-type', seed, 512), 'ERR_UNSUPPORTED_KEY_TYPE')
   })
 
@@ -110,6 +112,7 @@ describe('libp2p-crypto', function () {
     })
 
     it('throws on invalid hash name', () => {
+      // @ts-expect-error
       const fn = () => crypto.pbkdf2('password', 'at least 16 character salt', 500, 512 / 8, 'shaX-xxx')
       expect(fn).to.throw().with.property('code', 'ERR_UNSUPPORTED_HASH_TYPE')
     })

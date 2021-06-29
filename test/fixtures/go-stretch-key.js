@@ -1,8 +1,10 @@
 'use strict'
 
+const { the } = require('../util/index')
+
 module.exports = [{
-  cipher: 'AES-256',
-  hash: 'SHA256',
+  cipher: the('AES-256'),
+  hash: the('SHA256'),
   secret: Uint8Array.from([
     195, 191, 209, 165, 209, 201, 127, 122, 136, 111, 31, 66, 111, 68, 38, 155, 216, 204, 46, 181, 200, 188, 170, 204, 104, 74, 239, 251, 173, 114, 222, 234
   ]),

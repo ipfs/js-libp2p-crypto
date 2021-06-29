@@ -14,6 +14,12 @@ const bits = {
   'P-521': 521
 }
 
+/**
+ * @typedef {keyof typeof bits} Curve
+ *
+ * @param {Curve} curve
+ */
+
 exports.generateEphmeralKeyPair = async function (curve) {
   validateCurveType(Object.keys(bits), curve)
   const pair = await webcrypto.get().subtle.generateKey(
@@ -25,7 +31,12 @@ exports.generateEphmeralKeyPair = async function (curve) {
     ['deriveBits']
   )
 
-  // forcePrivate is used for testing only
+  /**
+   * forcePrivate is used for testing only
+   *
+   * @param {Uint8Array} theirPub
+   * @param {{ private: Uint8Array, public: Uint8Array }} [forcePrivate]
+   */
   const genSharedKey = async (theirPub, forcePrivate) => {
     let privateKey
 
@@ -61,14 +72,13 @@ exports.generateEphmeralKeyPair = async function (curve) {
     const buffer = await webcrypto.get().subtle.deriveBits(
       {
         name: 'ECDH',
-        namedCurve: curve,
         public: keys[0]
       },
       keys[1],
       bits[curve]
     )
 
-    return new Uint8Array(buffer, buffer.byteOffset, buffer.byteLength)
+    return new Uint8Array(buffer)
   }
 
   const publicKey = await webcrypto.get().subtle.exportKey('jwk', pair.publicKey)
@@ -85,24 +95,34 @@ const curveLengths = {
   'P-521': 66
 }
 
-// Marshal converts a jwk encodec ECDH public key into the
-// form specified in section 4.3.6 of ANSI X9.62. (This is the format
-// go-ipfs uses)
+/**
+ * Marshal converts a jwk encodec ECDH public key into the
+ * form specified in section 4.3.6 of ANSI X9.62. (This is the format
+ * go-ipfs uses)
+ *
+ * @param {JsonWebKey} jwk
+ */
 function marshalPublicKey (jwk) {
-  const byteLen = curveLengths[jwk.crv]
+  const { crv, x, y } = /** @type {{crv:Curve, x:string, y:string}} */ (jwk)
+  const byteLen = curveLengths[crv]
 
   return uint8ArrayConcat([
     Uint8Array.from([4]), // uncompressed point
-    base64urlToBuffer(jwk.x, byteLen),
-    base64urlToBuffer(jwk.y, byteLen)
+    base64urlToBuffer(x, byteLen),
+    base64urlToBuffer(y, byteLen)
   ], 1 + byteLen * 2)
 }
 
-// Unmarshal converts a point, serialized by Marshal, into an jwk encoded key
+/**
+ * Unmarshal converts a point, serialized by Marshal, into an jwk encoded key
+ *
+ * @param {Curve} curve
+ * @param {Uint8Array} key
+ */
 function unmarshalPublicKey (curve, key) {
   const byteLen = curveLengths[curve]
 
-  if (uint8ArrayEquals(!key.slice(0, 1), Uint8Array.from([4]))) {
+  if (!uint8ArrayEquals(key.slice(0, 1), Uint8Array.from([4]))) {
     throw errcode(new Error('Cannot unmarshal public key - invalid key format'), 'ERR_INVALID_KEY_FORMAT')
   }
 
@@ -115,6 +135,11 @@ function unmarshalPublicKey (curve, key) {
   }
 }
 
+/**
+ *
+ * @param {Curve} curve
+ * @param {{public: Uint8Array, private: Uint8Array}} key
+ */
 const unmarshalPrivateKey = (curve, key) => ({
   ...unmarshalPublicKey(curve, key.public),
   d: uint8ArrayToString(key.private, 'base64url')

@@ -1,4 +1,5 @@
 /* eslint-env mocha */
+// @ts-nocheck
 'use strict'
 
 const uint8ArrayFromString = require('uint8arrays/from-string')

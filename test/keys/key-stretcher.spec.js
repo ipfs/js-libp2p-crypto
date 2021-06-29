@@ -12,7 +12,9 @@ const fixtures = require('../fixtures/go-stretch-key')
 
 describe('keyStretcher', () => {
   describe('generate', () => {
+    /** @type {import('libp2p-crypto').CipherType[]} */
     const ciphers = ['AES-128', 'AES-256', 'Blowfish']
+    /** @type {import('libp2p-crypto').HashType[]} */
     const hashes = ['SHA1', 'SHA256', 'SHA512']
     let res
     // @ts-check
@@ -37,10 +39,12 @@ describe('keyStretcher', () => {
     })
 
     it('handles invalid cipher type', () => {
+      // @ts-expect-error
       return expectErrCode(crypto.keys.keyStretcher('invalid-cipher', 'SHA256', 'secret'), 'ERR_INVALID_CIPHER_TYPE')
     })
 
     it('handles missing hash type', () => {
+      // @ts-expect-error
       return expectErrCode(crypto.keys.keyStretcher('AES-128', '', 'secret'), 'ERR_MISSING_HASH_TYPE')
     })
   })

@@ -20,8 +20,17 @@ const cipherMap = {
   }
 }
 
-// Generates a set of keys for each party by stretching the shared key.
-// (myIV, theirIV, myCipherKey, theirCipherKey, myMACKey, theirMACKey)
+/**
+ * @typedef {keyof typeof cipherMap} Cipher
+ *
+ * Generates a set of keys for each party by stretching the shared key.
+ * (myIV, theirIV, myCipherKey, theirCipherKey, myMACKey, theirMACKey)
+ *
+ * @param {Cipher} cipherType
+ * @param {hmac.HashType} hash
+ * @param {Uint8Array} secret
+ * @returns {Promise<import('libp2p-interfaces/src/crypto/types').StretchPair>}
+ */
 module.exports = async (cipherType, hash, secret) => {
   const cipher = cipherMap[cipherType]
 
@@ -34,6 +43,7 @@ module.exports = async (cipherType, hash, secret) => {
     throw errcode(new Error('missing hash type'), 'ERR_MISSING_HASH_TYPE')
   }
 
+  // @ts-expect-error - Blowfish has no keySize
   const cipherKeySize = cipher.keySize
   const ivSize = cipher.ivSize
   const hmacKeySize = 20
@@ -64,6 +74,10 @@ module.exports = async (cipherType, hash, secret) => {
   const r1 = resultBuffer.slice(0, half)
   const r2 = resultBuffer.slice(half, resultLength)
 
+  /**
+   * @param {Uint8Array} res
+   * @returns {import('libp2p-interfaces/src/crypto/types').Keystretcher}
+   */
   const createKey = (res) => ({
     iv: res.slice(0, ivSize),
     cipherKey: res.slice(ivSize, ivSize + cipherKeySize),

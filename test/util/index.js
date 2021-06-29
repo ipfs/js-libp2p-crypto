@@ -18,4 +18,12 @@ const expectErrCode = async (p, code) => {
   expect.fail(`Expected error with code ${code} but no error thrown`)
 }
 
-module.exports = { expectErrCode }
+/**
+ * @template {string|number|null|boolean} T
+ * @param {T} value
+ * @returns {T}
+ */
+
+const the = value => value
+
+module.exports = { expectErrCode, the }

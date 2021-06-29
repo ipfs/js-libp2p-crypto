@@ -6,11 +6,16 @@ const chai = require('chai')
 const dirtyChai = require('dirty-chai')
 const expect = chai.expect
 chai.use(dirtyChai)
+// @ts-ignore
 require('node-forge/lib/jsbn')
+/** @type {import('node-forge')} */
+// @ts-ignore
 const forge = require('node-forge/lib/forge')
+
 const util = require('../src/util')
 
 describe('Util', () => {
+  /** @type {import('node-forge').jsbn.BigInteger} */
   let bn
 
   before(() => {

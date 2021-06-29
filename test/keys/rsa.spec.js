@@ -16,14 +16,11 @@ const fixtures = require('../fixtures/go-key-rsa')
 
 const testGarbage = require('../helpers/test-garbage-error-handling')
 
-/** @typedef {import('libp2p-crypto').keys.supportedKeys.rsa.RsaPrivateKey} RsaPrivateKey */
+/** @typedef {import('../../src/keys/rsa-class').PrivateKey} RsaPrivateKey */
 
 describe('RSA', function () {
   this.timeout(20 * 1000)
-  // @ts-check
-  /**
-   * @type {RsaPrivateKey}
-   */
+  /** @type {RsaPrivateKey} */
   let key
 
   before(async () => {
@@ -37,7 +34,7 @@ describe('RSA', function () {
   })
 
   it('signs', async () => {
-    const text = key.genSecret()
+    const text = rsa.genSecret()
     const sig = await key.sign(text)
     const res = await key.public.verify(text, sig)
     expect(res).to.be.eql(true)
@@ -164,6 +161,7 @@ describe('RSA', function () {
     })
 
     it('handles invalid export type', () => {
+      // @ts-expect-error
       return expectErrCode(key.export('secret', 'invalid-type'), 'ERR_INVALID_EXPORT_FORMAT')
     })
   })

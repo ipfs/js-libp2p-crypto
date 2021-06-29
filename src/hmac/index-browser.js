@@ -9,10 +9,23 @@ const hashTypes = {
   SHA512: 'SHA-512'
 }
 
+/**
+ *
+ * @param {CryptoKey} key
+ * @param {Uint8Array} data
+ */
 const sign = async (key, data) => {
   const buf = await webcrypto.get().subtle.sign({ name: 'HMAC' }, key, data)
-  return new Uint8Array(buf, buf.byteOffset, buf.byteLength)
+  return new Uint8Array(buf)
 }
+
+/**
+ * @typedef {import('./index').HashType} HashType
+ *
+ * @param {HashType} hashType
+ * @param {Uint8Array} secret
+ * @returns {Promise<import('libp2p-interfaces/src/crypto/types').Hasher>}
+ */
 
 exports.create = async function (hashType, secret) {
   const hash = hashTypes[hashType]

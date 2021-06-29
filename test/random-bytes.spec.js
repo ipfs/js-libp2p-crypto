@@ -22,6 +22,7 @@ describe('randomBytes', () => {
   })
 
   it('throws if length is not a number', () => {
+    // @ts-expect-error - expects number
     expect(() => randomBytes('hi')).to.throw(Error).with.property('code', 'ERR_INVALID_LENGTH')
   })
 })

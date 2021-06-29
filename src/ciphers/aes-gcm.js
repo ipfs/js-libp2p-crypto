@@ -15,7 +15,6 @@ const uint8ArrayFromString = require('uint8arrays/from-string')
  * @param {string} [options.digest=sha256]
  * @param {number} [options.saltLength=16]
  * @param {number} [options.iterations=32767]
- * @returns {*}
  */
 function create ({
   algorithmTagLength = 16,
@@ -57,12 +56,8 @@ function create ({
     // Generate a 128-bit salt using a CSPRNG.
     const salt = crypto.randomBytes(saltLength)
 
-    if (typeof password === 'string' || password instanceof String) {
-      password = uint8ArrayFromString(password)
-    }
-
     // Derive a key using PBKDF2.
-    const key = crypto.pbkdf2Sync(password, salt, iterations, keyLength, digest)
+    const key = crypto.pbkdf2Sync(decodePassword(password), salt, iterations, keyLength, digest)
 
     // Encrypt and prepend salt.
     return uint8ArrayConcat([salt, await encryptWithKey(Uint8Array.from(data), key)])
@@ -108,12 +103,8 @@ function create ({
     const salt = data.slice(0, saltLength)
     const ciphertextAndNonce = data.slice(saltLength)
 
-    if (typeof password === 'string' || password instanceof String) {
-      password = uint8ArrayFromString(password)
-    }
-
     // Derive the key using PBKDF2.
-    const key = crypto.pbkdf2Sync(password, salt, iterations, keyLength, digest)
+    const key = crypto.pbkdf2Sync(decodePassword(password), salt, iterations, keyLength, digest)
 
     // Decrypt and return result.
     return decryptWithKey(ciphertextAndNonce, key)
@@ -122,6 +113,21 @@ function create ({
   return {
     encrypt,
     decrypt
+  }
+}
+/**
+ *
+ * @param {string | InstanceType<typeof globalThis.String> | Uint8Array} password
+ * @returns {Uint8Array}
+ */
+
+const decodePassword = (password) => {
+  if (typeof password === 'string') {
+    return uint8ArrayFromString(password)
+  } else if (password instanceof String) {
+    return uint8ArrayFromString(password.toString())
+  } else {
+    return password
   }
 }
 

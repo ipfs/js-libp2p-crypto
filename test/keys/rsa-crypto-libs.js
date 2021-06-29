@@ -16,7 +16,9 @@ describe('RSA crypto libs', function () {
 
   LIBS.forEach(lib => {
     describe(lib, () => {
+      /** @type {import('../../src')} */
       let crypto
+      /** @type {typeof crypto.keys.supportedKeys.rsa} */
       let rsa
 
       before(() => {

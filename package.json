@@ -18,8 +18,9 @@
   ],
   "scripts": {
     "lint": "aegir lint",
-    "build": "npm run build:proto && aegir build --no-types",
+    "build": "npm run build:proto && aegir build",
     "build:proto": "pbjs -t static-module -w commonjs  -r libp2p-crypto-keys --force-number --no-verify --no-delimited --no-create --no-beautify --no-defaults --lint eslint-disable -o src/keys/keys.js ./src/keys/keys.proto",
+    "build:proto-types": "pbts -o src/keys/keys.d.ts src/keys/keys.js",
     "test": "aegir test",
     "test:node": "aegir test -t node",
     "test:browser": "aegir test -t browser -t webworker",
@@ -29,6 +30,9 @@
     "coverage": "aegir coverage --ignore src/keys/keys.proto.js",
     "size": "aegir build --bundlesize",
     "test:types": "npx tsc"
+  },
+  "eslintConfig": {
+    "extends": "ipfs"
   },
   "keywords": [
     "IPFS",
@@ -52,14 +56,18 @@
     "protobufjs": "^6.10.2",
     "secp256k1": "^4.0.0",
     "uint8arrays": "^2.1.4",
-    "ursa-optional": "^0.10.1"
+    "ursa-optional": "^0.10.1",
+    "libp2p-interfaces": "git://github.com/libp2p/js-libp2p-interfaces#feat/interfaces"
   },
   "devDependencies": {
     "@types/chai": "^4.2.12",
     "@types/chai-string": "^1.4.2",
     "@types/dirty-chai": "^2.0.2",
     "@types/mocha": "^8.0.1",
-    "aegir": "^33.0.0",
+    "@types/pem-jwk": "^1.5.0",
+    "@types/node-forge": "^0.10.0",
+    "@types/secp256k1": "^4.0.2",
+    "aegir": "^33.2.2",
     "benchmark": "^2.1.4",
     "chai": "^4.2.0",
     "chai-string": "^1.5.0",

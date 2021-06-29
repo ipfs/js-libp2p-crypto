@@ -8,6 +8,10 @@ const curves = {
   'P-384': 'secp384r1',
   'P-521': 'secp521r1'
 }
+/**
+ * @typedef {keyof typeof curves} Curve
+ * @param {Curve} curve
+ */
 
 exports.generateEphmeralKeyPair = async function (curve) { // eslint-disable-line require-await
   validateCurveType(Object.keys(curves), curve)
@@ -16,7 +20,13 @@ exports.generateEphmeralKeyPair = async function (curve) { // eslint-disable-lin
   ecdh.generateKeys()
 
   return {
+    /** @type {Uint8Array} */
     key: ecdh.getPublicKey(),
+    /**
+     * @param {Uint8Array} theirPub
+     * @param {{private: Uint8Array, public?:any}} [forcePrivate]
+     * @returns {Promise<Uint8Array>}
+     */
     async genSharedKey (theirPub, forcePrivate) { // eslint-disable-line require-await
       if (forcePrivate) {
         ecdh.setPrivateKey(forcePrivate.private)
